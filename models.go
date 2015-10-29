@@ -66,7 +66,11 @@ type Spot struct {
 
 func (s *Spot) key(c context.Context) *datastore.Key {
 	if s.SpotCode == 0 {
-		return datastore.NewIncompleteKey(c, "", nil)
+		low, _, err := datastore.AllocateIDs(c, "Spot", nil, 1)
+		if err != nil {
+			return nil
+		}
+		return datastore.NewKey(c, "Spot", "", low, nil)
 	}
 	return datastore.NewKey(c, "Spot", "", s.SpotCode, nil)
 }
