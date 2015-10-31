@@ -26,6 +26,7 @@ func (u *T2JPUser) key(c context.Context) *datastore.Key {
 	return datastore.NewKey(c, "T2JPUser", u.KeyName, 0, nil)
 }
 
+//Create new T2JPUser entity
 func (u *T2JPUser) Create(c context.Context) (*T2JPUser, error) {
 	currentUser := user.Current(c)
 	u.KeyName = currentUser.ID
@@ -39,6 +40,7 @@ func (u *T2JPUser) Create(c context.Context) (*T2JPUser, error) {
 	return u, nil
 }
 
+//Update existing T2JPUser entity
 func (u *T2JPUser) Update(c context.Context) (*T2JPUser, error) {
 	u.UpdatedAt = time.Now()
 	_, err := datastore.Put(c, u.key(c), u)
@@ -75,6 +77,7 @@ func (s *Spot) key(c context.Context) *datastore.Key {
 	return datastore.NewKey(c, "Spot", "", s.SpotCode, nil)
 }
 
+//Create new Spot Entity
 func (s *Spot) Create(c context.Context) (*Spot, error) {
 	currentUser := user.Current(c)
 	s.Editor = currentUser.ID
@@ -89,6 +92,7 @@ func (s *Spot) Create(c context.Context) (*Spot, error) {
 	return s, nil
 }
 
+//Update existing Spot Entity
 func (s *Spot) Update(c context.Context) (*Spot, error) {
 	s.UpdatedAt = time.Now()
 	_, err := datastore.Put(c, s.key(c), s)
