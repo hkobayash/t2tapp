@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"fmt"
 
 	"github.com/unrolled/render"
 	"github.com/zenazn/goji/web"
@@ -34,14 +35,16 @@ func spotCreateHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	var spot Spot
 	ctx := appengine.NewContext(r)
 	ren := render.New()
-	err := json.NewDecoder(r.Body).Decode(spot)
+	fmt.Print("body:", r.Body)
+	err := json.NewDecoder(r.Body).Decode(&spot)
 	if err != nil {
-		ren.JSON(w, http.StatusBadRequest, map[string]interface{}{"message": "error"})
+		ren.JSON(w, http.StatusBadRequest, map[string]interface{}{"message": "error, cannot decode json"})
+		fmt.Print("failed to parse JSON: ", err)
 		return
 	}
 	_, err = spot.Create(ctx)
 	if err != nil {
-		ren.JSON(w, http.StatusBadRequest, map[string]interface{}{"message": "error"})
+		ren.JSON(w, http.StatusBadRequest, map[string]interface{}{"message": "error, cannot create new entity"})
 		return
 	}
 	ren.JSON(w, http.StatusCreated, map[string]interface{}{"message": "new entity created"})

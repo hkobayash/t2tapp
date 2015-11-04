@@ -8,6 +8,8 @@ import (
 
 	"github.com/zenazn/goji/web"
 
+	"net/http"
+
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/aetest"
 )
@@ -31,15 +33,17 @@ func TestSpot(t *testing.T) {
 		t.Fatalf("Failed to create instance: %v", err)
 	}
 	defer inst.Close()
-
 	req, err := inst.NewRequest("GET", "/edit/v1/spots", nil)
 	if err != nil {
-		t.Fatalf("Failed to create req1: %v", err)
+		t.Fatalf("Failed to create req: %v", err)
 	}
 	_ = appengine.NewContext(req)
 	res := httptest.NewRecorder()
 	c := web.C{}
 	spotHandler(c, res, req)
+	if res.Code != http.StatusOK {
+		t.Fatalf("Fail to request spots list")
+	}
 }
 
 func TestCreateSpot(t *testing.T) {
@@ -50,4 +54,10 @@ func TestCreateSpot(t *testing.T) {
 		t.Fatalf("Failed to create req: %v", err)
 	}
 	_ = appengine.NewContext(req)
+	res := httptest.NewRecorder()
+	c := web.C{}
+	spotCreateHandler(c, res, req)
+	if res.Code != http.StatusCreated {
+		t.Fatalf("Fail to request spots create, status code: %v", res.Code)
+	}
 }
