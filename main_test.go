@@ -12,6 +12,7 @@ import (
 
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/aetest"
+	"google.golang.org/appengine/user"
 )
 
 func TestIndex(t *testing.T) {
@@ -37,6 +38,8 @@ func TestSpot(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create req: %v", err)
 	}
+	loginUser := user.User{Email: "hoge@gmail.com", Admin: false, ID: "111111"}
+	aetest.Login(&loginUser, req)
 	_ = appengine.NewContext(req)
 	res := httptest.NewRecorder()
 	c := web.C{}
@@ -53,6 +56,8 @@ func TestCreateSpot(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create req: %v", err)
 	}
+	loginUser := user.User{Email: "hoge@gmail.com", Admin: false, ID: "111111"}
+	aetest.Login(&loginUser, req)
 	_ = appengine.NewContext(req)
 	res := httptest.NewRecorder()
 	c := web.C{}

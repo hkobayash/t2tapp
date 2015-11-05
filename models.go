@@ -79,8 +79,8 @@ func (s *Spot) key(c context.Context) *datastore.Key {
 
 //Create new Spot Entity
 func (s *Spot) Create(c context.Context) (*Spot, error) {
-	//currentUser := user.Current(c)
-	//s.Editor = currentUser.ID
+	currentUser := user.Current(c)
+	s.Editor = currentUser.ID
 	s.Status = "draft"
 	s.CreatedAt = time.Now()
 	s.UpdatedAt = time.Now()

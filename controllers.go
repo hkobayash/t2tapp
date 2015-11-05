@@ -3,11 +3,11 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-	"fmt"
 
 	"github.com/unrolled/render"
 	"github.com/zenazn/goji/web"
 	"google.golang.org/appengine"
+	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/datastore"
 )
 
@@ -35,11 +35,10 @@ func spotCreateHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	var spot Spot
 	ctx := appengine.NewContext(r)
 	ren := render.New()
-	fmt.Print("body:", r.Body)
 	err := json.NewDecoder(r.Body).Decode(&spot)
 	if err != nil {
 		ren.JSON(w, http.StatusBadRequest, map[string]interface{}{"message": "error, cannot decode json"})
-		fmt.Print("failed to parse JSON: ", err)
+		log.Infof(ctx, "failed to parse JSON:%v", err)
 		return
 	}
 	_, err = spot.Create(ctx)
