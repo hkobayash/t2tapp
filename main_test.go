@@ -12,6 +12,7 @@ import (
 
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/aetest"
+	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/user"
 )
 
@@ -50,7 +51,8 @@ func TestSpot(t *testing.T) {
 }
 
 func TestCreateSpot(t *testing.T) {
-	inst, err := aetest.NewInstance(nil)
+	opt := aetest.Options{AppID:"t2jp-2015", StronglyConsistentDatastore: true}
+	inst, err := aetest.NewInstance(&opt)
 	input, err := json.Marshal(Spot{SpotName: "foo", Body: "bar"})
 	req, err := inst.NewRequest("POST", "/edit/v1/spots", bytes.NewBuffer(input))
 	if err != nil {
@@ -58,11 +60,21 @@ func TestCreateSpot(t *testing.T) {
 	}
 	loginUser := user.User{Email: "hoge@gmail.com", Admin: false, ID: "111111"}
 	aetest.Login(&loginUser, req)
-	_ = appengine.NewContext(req)
+	ctx := appengine.NewContext(req)
 	res := httptest.NewRecorder()
 	c := web.C{}
 	spotCreateHandler(c, res, req)
 	if res.Code != http.StatusCreated {
 		t.Fatalf("Fail to request spots create, status code: %v", res.Code)
 	}
+	spots := []Spot{}
+	_, err = datastore.NewQuery("Spot").Order("-UpdatedAt").GetAll(ctx, &spots)
+	for i := 0; i < len(spots); i++ {
+		t.Logf("SpotCode:%v", spots[i].SpotCode)
+		t.Logf("SpotName:%v", spots[i].SpotName)
+	}
+	if spots[0].SpotName != "foo" {
+		t.Fatalf("not expected value! :%v", spots[0].SpotName)
+	}
+
 }

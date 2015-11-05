@@ -84,11 +84,12 @@ func (s *Spot) Create(c context.Context) (*Spot, error) {
 	s.Status = "draft"
 	s.CreatedAt = time.Now()
 	s.UpdatedAt = time.Now()
-	k, err := datastore.Put(c, s.key(c), s)
+	newKey := s.key(c)
+	s.SpotCode = newKey.IntID()
+	_, err := datastore.Put(c, newKey, s)
 	if err != nil {
 		return nil, err
 	}
-	s.SpotCode = k.IntID()
 	return s, nil
 }
 
