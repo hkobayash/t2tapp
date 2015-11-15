@@ -22,18 +22,18 @@ type T2JPUser struct {
 	CreatedAt  time.Time `json:"created_at" datastore:"CreatedAt"`
 }
 
-func (u *T2JPUser) key(c context.Context) *datastore.Key {
-	return datastore.NewKey(c, "T2JPUser", u.KeyName, 0, nil)
+func (u *T2JPUser) key(ctx context.Context) *datastore.Key {
+	return datastore.NewKey(ctx, "T2JPUser", u.KeyName, 0, nil)
 }
 
 //Create new T2JPUser entity
-func (u *T2JPUser) Create(c context.Context) (*T2JPUser, error) {
-	currentUser := user.Current(c)
+func (u *T2JPUser) Create(ctx context.Context) (*T2JPUser, error) {
+	currentUser := user.Current(ctx)
 	u.KeyName = currentUser.ID
 	u.Email = currentUser.Email
 	u.CreatedAt = time.Now()
 	u.UpdatedAt = time.Now()
-	_, err := datastore.Put(c, u.key(c), u)
+	_, err := datastore.Put(ctx, u.key(ctx), u)
 	if err != nil {
 		return nil, err
 	}
@@ -41,9 +41,9 @@ func (u *T2JPUser) Create(c context.Context) (*T2JPUser, error) {
 }
 
 //Update existing T2JPUser entity
-func (u *T2JPUser) Update(c context.Context) (*T2JPUser, error) {
+func (u *T2JPUser) Update(ctx context.Context) (*T2JPUser, error) {
 	u.UpdatedAt = time.Now()
-	_, err := datastore.Put(c, u.key(c), u)
+	_, err := datastore.Put(ctx, u.key(ctx), u)
 	if err != nil {
 		return nil, err
 	}
@@ -66,27 +66,27 @@ type Spot struct {
 	CreatedAt      time.Time          `json:"created_at" datastore:"CreatedAt"`
 }
 
-func (s *Spot) key(c context.Context) *datastore.Key {
+func (s *Spot) key(ctx context.Context) *datastore.Key {
 	if s.SpotCode == 0 {
-		low, _, err := datastore.AllocateIDs(c, "Spot", nil, 1)
+		low, _, err := datastore.AllocateIDs(ctx, "Spot", nil, 1)
 		if err != nil {
 			return nil
 		}
-		return datastore.NewKey(c, "Spot", "", low, nil)
+		return datastore.NewKey(ctx, "Spot", "", low, nil)
 	}
-	return datastore.NewKey(c, "Spot", "", s.SpotCode, nil)
+	return datastore.NewKey(ctx, "Spot", "", s.SpotCode, nil)
 }
 
 //Create new Spot Entity
-func (s *Spot) Create(c context.Context) (*Spot, error) {
-	currentUser := user.Current(c)
+func (s *Spot) Create(ctx context.Context) (*Spot, error) {
+	currentUser := user.Current(ctx)
 	s.Editor = currentUser.ID
 	s.Status = "draft"
 	s.CreatedAt = time.Now()
 	s.UpdatedAt = time.Now()
-	newKey := s.key(c)
+	newKey := s.key(ctx)
 	s.SpotCode = newKey.IntID()
-	_, err := datastore.Put(c, newKey, s)
+	_, err := datastore.Put(ctx, newKey, s)
 	if err != nil {
 		return nil, err
 	}
@@ -94,9 +94,10 @@ func (s *Spot) Create(c context.Context) (*Spot, error) {
 }
 
 //Update existing Spot Entity
-func (s *Spot) Update(c context.Context) (*Spot, error) {
+func (s *Spot) Update(ctx context.Context, spotCode int64) (*Spot, error) {
+	s.SpotCode = spotCode
 	s.UpdatedAt = time.Now()
-	_, err := datastore.Put(c, s.key(c), s)
+	_, err := datastore.Put(ctx, s.key(ctx), s)
 	if err != nil {
 		return nil, err
 	}
