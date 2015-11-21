@@ -85,7 +85,7 @@ type GetResponse struct {
 	Item    Spot   `json:"item"`
 }
 
-func TestUpdateSpot(t *testing.T) {
+func TestGetSpot(t *testing.T) {
 	opt := aetest.Options{AppID: "t2jp-2015", StronglyConsistentDatastore: true}
 	inst, err := aetest.NewInstance(&opt)
 	input, err := json.Marshal(Spot{SpotName: "foo", Body: "bar"})
