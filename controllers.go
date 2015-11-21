@@ -33,6 +33,25 @@ func spotHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	ren.JSON(w, http.StatusOK, map[string]interface{}{"items": spots})
 }
 
+func spotGetHandler(c web.C, w http.ResponseWriter, r *http.Request) {
+	ctx := appengine.NewContext(r)
+	ren := render.New()
+	spotCode, err := strconv.ParseInt(c.URLParams["spotCode"], 10, 64)
+	if err != nil {
+		log.Infof(ctx, "failed to parse int :%v", err)
+		ren.JSON(w, http.StatusBadRequest, map[string]interface{}{"message": "error, bad resource id"})
+		return
+	}
+	var spot Spot
+	spot.SpotCode = spotCode
+	err = datastore.Get(ctx, spot.key(ctx), &spot)
+	if err != nil {
+		ren.JSON(w, http.StatusNotFound, map[string]interface{}{"message": "error, entity not found"})
+		return
+	}
+	ren.JSON(w, http.StatusOK, map[string]interface{}{"item": spot})
+}
+
 func spotCreateHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	var spot Spot
 	ctx := appengine.NewContext(r)
@@ -48,7 +67,7 @@ func spotCreateHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		ren.JSON(w, http.StatusBadRequest, map[string]interface{}{"message": "error, cannot create new entity"})
 		return
 	}
-	ren.JSON(w, http.StatusCreated, map[string]interface{}{"message": "new entity created"})
+	ren.JSON(w, http.StatusCreated, map[string]interface{}{"message": "new entity created", "item": spot})
 }
 
 func spotUpdateHandler(c web.C, w http.ResponseWriter, r *http.Request) {
@@ -60,6 +79,7 @@ func spotUpdateHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var checkSpot Spot
+	checkSpot.SpotCode = spotCode
 	currentUser := user.Current(ctx)
 	err = datastore.Get(ctx, checkSpot.key(ctx), &checkSpot)
 	if err != nil {

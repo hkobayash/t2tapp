@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 
 	"github.com/zenazn/goji/web"
@@ -51,7 +52,7 @@ func TestSpot(t *testing.T) {
 }
 
 func TestCreateSpot(t *testing.T) {
-	opt := aetest.Options{AppID:"t2jp-2015", StronglyConsistentDatastore: true}
+	opt := aetest.Options{AppID: "t2jp-2015", StronglyConsistentDatastore: true}
 	inst, err := aetest.NewInstance(&opt)
 	input, err := json.Marshal(Spot{SpotName: "foo", Body: "bar"})
 	req, err := inst.NewRequest("POST", "/edit/v1/spots", bytes.NewBuffer(input))
@@ -77,4 +78,42 @@ func TestCreateSpot(t *testing.T) {
 		t.Fatalf("not expected value! :%v", spots[0].SpotName)
 	}
 
+}
+
+type GetResponse struct {
+	Message string `json:"message"`
+	Item    Spot   `json:"item"`
+}
+
+func TestUpdateSpot(t *testing.T) {
+	opt := aetest.Options{AppID: "t2jp-2015", StronglyConsistentDatastore: true}
+	inst, err := aetest.NewInstance(&opt)
+	input, err := json.Marshal(Spot{SpotName: "foo", Body: "bar"})
+	req, err := inst.NewRequest("POST", "/edit/v1/spots", bytes.NewBuffer(input))
+	if err != nil {
+		t.Fatalf("Failed to create req: %v", err)
+	}
+	loginUser := user.User{Email: "hoge@gmail.com", Admin: false, ID: "111111"}
+	aetest.Login(&loginUser, req)
+	// ctx := appengine.NewContext(req)
+	res := httptest.NewRecorder()
+	c := web.C{}
+	spotCreateHandler(c, res, req)
+	if res.Code != http.StatusCreated {
+		t.Fatalf("Fail to request spots create, status code: %v", res.Code)
+	}
+	var getResponse GetResponse
+	err = json.NewDecoder(res.Body).Decode(&getResponse)
+	spotCode := getResponse.Item.SpotCode
+	t.Logf("spot code: %v", strconv.FormatInt(spotCode, 10))
+	getReq, err := inst.NewRequest("GET", "/edit/v1/spots/"+strconv.FormatInt(spotCode, 10), nil)
+	if err != nil {
+		t.Fatalf("Failed to create req: %v", err)
+	}
+	getRes := httptest.NewRecorder()
+	getC := web.C{URLParams:map[string]string{"spotCode": strconv.FormatInt(spotCode, 10)}}
+	spotGetHandler(getC, getRes, getReq)
+	if getRes.Code != http.StatusOK {
+		t.Fatalf("Fail to request spot get, status code: %v", getRes.Code)
+	}
 }
