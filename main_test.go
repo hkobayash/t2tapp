@@ -111,7 +111,7 @@ func TestGetSpot(t *testing.T) {
 		t.Fatalf("Failed to create req: %v", err)
 	}
 	getRes := httptest.NewRecorder()
-	getC := web.C{URLParams:map[string]string{"spotCode": strconv.FormatInt(spotCode, 10)}}
+	getC := web.C{URLParams: map[string]string{"spotCode": strconv.FormatInt(spotCode, 10)}}
 	spotGetHandler(getC, getRes, getReq)
 	if getRes.Code != http.StatusOK {
 		t.Fatalf("Fail to request spot get, status code: %v", getRes.Code)
