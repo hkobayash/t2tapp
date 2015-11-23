@@ -117,3 +117,37 @@ func TestGetSpot(t *testing.T) {
 		t.Fatalf("Fail to request spot get, status code: %v", getRes.Code)
 	}
 }
+
+func TestUpdateSpot(t *testing.T) {
+	opt := aetest.Options{AppID: "t2jp-2015", StronglyConsistentDatastore: true}
+	inst, err := aetest.NewInstance(&opt)
+	input, err := json.Marshal(Spot{SpotName: "foo", Body: "bar"})
+	req, err := inst.NewRequest("POST", "/edit/v1/spots", bytes.NewBuffer(input))
+	if err != nil {
+		t.Fatalf("Failed to create req: %v", err)
+	}
+	loginUser := user.User{Email: "hoge@gmail.com", Admin: false, ID: "111111"}
+	aetest.Login(&loginUser, req)
+	// ctx := appengine.NewContext(req)
+	res := httptest.NewRecorder()
+	c := web.C{}
+	spotCreateHandler(c, res, req)
+	if res.Code != http.StatusCreated {
+		t.Fatalf("Fail to request spots create, status code: %v", res.Code)
+	}
+	var getResponse GetResponse
+	err = json.NewDecoder(res.Body).Decode(&getResponse)
+	spotCodeString := strconv.FormatInt(getResponse.Item.SpotCode, 10)
+	t.Logf("spot code: %v", spotCodeString)
+	patchInput, err := json.Marshal(Spot{SpotName: "foo2", Body: "barbar"})
+	patchReq, err := inst.NewRequest("PATCH", "/edit/v1/spots/"+spotCodeString, bytes.NewBuffer(patchInput))
+	if err != nil {
+		t.Fatalf("Failed to create req: %v", err)
+	}
+	patchRes := httptest.NewRecorder()
+	patchC := web.C{URLParams: map[string]string{"spotCode": spotCodeString}}
+	spotUpdateHandler(patchC, patchRes, patchReq)
+	if patchRes.Code != http.StatusOK {
+		t.Fatalf("Fail to request spot patch, status code: %v", patchRes.Code)
+	}
+}
