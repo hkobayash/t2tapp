@@ -97,10 +97,11 @@ func spotUpdateHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		log.Infof(ctx, "failed to parse JSON:%v", err)
 		return
 	}
+	updateSpot.Editor = checkSpot.Editor
 	_, err = updateSpot.Update(ctx, spotCode)
 	if err != nil {
 		ren.JSON(w, http.StatusForbidden, map[string]interface{}{"message": "error, you cannot edit this spot"})
 		return
 	}
-	ren.JSON(w, http.StatusCreated, map[string]interface{}{"message": "new entity created"})
+	ren.JSON(w, http.StatusCreated, map[string]interface{}{"message": "entity updated", "item":updateSpot})
 }
