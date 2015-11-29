@@ -103,5 +103,5 @@ func spotUpdateHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		ren.JSON(w, http.StatusForbidden, map[string]interface{}{"message": "error, you cannot edit this spot"})
 		return
 	}
-	ren.JSON(w, http.StatusCreated, map[string]interface{}{"message": "entity updated", "item":updateSpot})
+	ren.JSON(w, http.StatusOK, map[string]interface{}{"message": "entity updated", "item": updateSpot})
 }

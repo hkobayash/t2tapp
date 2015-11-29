@@ -141,6 +141,7 @@ func TestUpdateSpot(t *testing.T) {
 	t.Logf("spot code: %v", spotCodeString)
 	patchInput, err := json.Marshal(Spot{SpotName: "foo2", Body: "barbar"})
 	patchReq, err := inst.NewRequest("PATCH", "/edit/v1/spots/"+spotCodeString, bytes.NewBuffer(patchInput))
+	aetest.Login(&loginUser, patchReq)
 	if err != nil {
 		t.Fatalf("Failed to create req: %v", err)
 	}
