@@ -53,8 +53,23 @@ func (u *T2JPUser) Update(ctx context.Context) (*T2JPUser, error) {
 // Spot is the kind which stores sightseeing spot information
 // Set SpotCode as KeyName
 type Spot struct {
+	SpotCode       int64              `json:"-" datastore:"SpotCode"`
+	RevisionNumber int                `json:"-" datastore:"Revision"` // increment on update
+	Status         string             `json:"status" datastore:"Status"`     // 'post' or 'revision' or 'draft'
+	SpotName       string             `json:"spot_name" datastore:"SpotName"`
+	Body           string             `json:"body" datastore:"Body,noindex"`
+	Photos         []string           `json:"photos" datastore:"Photos"`
+	GeoInfo        appengine.GeoPoint `json:"geo_info" datastore:"GeoInfo"`
+	Phone          string             `json:"phone" datastore:"Phone"`
+	Editor         string             `json:"-" datastore:"Editor"`
+	UpdatedAt      time.Time          `json:"-" datastore:"UpdatedAt"`
+	CreatedAt      time.Time          `json:"-" datastore:"CreatedAt"`
+}
+
+// Spot Struct for Listing
+type SpotGet struct {
 	SpotCode       int64              `json:"spot_code" datastore:"SpotCode"`
-	RevisionNumber int                `json:"revision" datastore:"Revision"` // increment on update
+	RevisionNumber int                `json:"revision_number" datastore:"Revision"` // increment on update
 	Status         string             `json:"status" datastore:"Status"`     // 'post' or 'revision' or 'draft'
 	SpotName       string             `json:"spot_name" datastore:"SpotName"`
 	Body           string             `json:"body" datastore:"Body,noindex"`
@@ -67,6 +82,17 @@ type Spot struct {
 }
 
 func (s *Spot) key(ctx context.Context) *datastore.Key {
+	if s.SpotCode == 0 {
+		low, _, err := datastore.AllocateIDs(ctx, "Spot", nil, 1)
+		if err != nil {
+			return nil
+		}
+		return datastore.NewKey(ctx, "Spot", "", low, nil)
+	}
+	return datastore.NewKey(ctx, "Spot", "", s.SpotCode, nil)
+}
+
+func (s *SpotGet) key(ctx context.Context) *datastore.Key {
 	if s.SpotCode == 0 {
 		low, _, err := datastore.AllocateIDs(ctx, "Spot", nil, 1)
 		if err != nil {
@@ -96,6 +122,7 @@ func (s *Spot) Create(ctx context.Context) (*Spot, error) {
 //Update existing Spot Entity
 func (s *Spot) Update(ctx context.Context, spotCode int64) (*Spot, error) {
 	s.SpotCode = spotCode
+	s.RevisionNumber = s.RevisionNumber + 1
 	s.UpdatedAt = time.Now()
 	_, err := datastore.Put(ctx, s.key(ctx), s)
 	if err != nil {

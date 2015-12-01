@@ -82,7 +82,7 @@ func TestCreateSpot(t *testing.T) {
 
 type GetResponse struct {
 	Message string `json:"message"`
-	Item    Spot   `json:"item"`
+	Item    SpotGet   `json:"item"`
 }
 
 func TestGetSpot(t *testing.T) {
@@ -137,6 +137,9 @@ func TestUpdateSpot(t *testing.T) {
 	}
 	var getResponse GetResponse
 	err = json.NewDecoder(res.Body).Decode(&getResponse)
+	if getResponse.Item.Status != "draft" {
+		t.Fatalf("not saved as draft on creation!")
+	}
 	spotCodeString := strconv.FormatInt(getResponse.Item.SpotCode, 10)
 	t.Logf("spot code: %v", spotCodeString)
 	patchInput, err := json.Marshal(Spot{SpotName: "foo2", Body: "barbar"})
@@ -150,5 +153,15 @@ func TestUpdateSpot(t *testing.T) {
 	spotUpdateHandler(patchC, patchRes, patchReq)
 	if patchRes.Code != http.StatusOK {
 		t.Fatalf("Fail to request spot patch, status code: %v", patchRes.Code)
+	}
+	var checkSpot Spot
+	ctx := appengine.NewContext(patchReq)
+	checkSpot.SpotCode = getResponse.Item.SpotCode
+	err = datastore.Get(ctx, checkSpot.key(ctx), &checkSpot)
+	if err != nil {
+		t.Fatalf("Fail to get data from datastore: %v", err)
+	}
+	if checkSpot.RevisionNumber != 1 {
+		t.Fatalf("RevisionNumber should be 1")
 	}
 }
