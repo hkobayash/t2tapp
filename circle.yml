@@ -1,0 +1,12 @@
+machine:
+  timezone:
+    Asia/Tokyo
+
+dependencies:
+  pre:
+    - python getlatestsdk.py
+    - unzip -q -d $HOME google_appengine.zip
+
+test:
+  override:
+    - $HOME/go_appengine/goapp test
