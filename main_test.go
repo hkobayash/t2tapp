@@ -54,6 +54,7 @@ func TestSpot(t *testing.T) {
 func TestCreateSpot(t *testing.T) {
 	opt := aetest.Options{AppID: "t2jp-2015", StronglyConsistentDatastore: true}
 	inst, err := aetest.NewInstance(&opt)
+	defer inst.Close()
 	input, err := json.Marshal(Spot{SpotName: "foo", Body: "bar"})
 	req, err := inst.NewRequest("POST", "/edit/v1/spots", bytes.NewBuffer(input))
 	if err != nil {
@@ -88,6 +89,7 @@ type GetResponse struct {
 func TestGetSpot(t *testing.T) {
 	opt := aetest.Options{AppID: "t2jp-2015", StronglyConsistentDatastore: true}
 	inst, err := aetest.NewInstance(&opt)
+	defer inst.Close()
 	input, err := json.Marshal(Spot{SpotName: "foo", Body: "bar"})
 	req, err := inst.NewRequest("POST", "/edit/v1/spots", bytes.NewBuffer(input))
 	if err != nil {
@@ -121,6 +123,7 @@ func TestGetSpot(t *testing.T) {
 func TestUpdateSpot(t *testing.T) {
 	opt := aetest.Options{AppID: "t2jp-2015", StronglyConsistentDatastore: true}
 	inst, err := aetest.NewInstance(&opt)
+	defer inst.Close()
 	input, err := json.Marshal(Spot{SpotName: "foo", Body: "bar"})
 	req, err := inst.NewRequest("POST", "/edit/v1/spots", bytes.NewBuffer(input))
 	if err != nil {
