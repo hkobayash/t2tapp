@@ -24,7 +24,7 @@ func indexHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 func spotHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	ren := render.New()
 	ctx := appengine.NewContext(r)
-	spots := []Spot{}
+	spots := []SpotGet{}
 	_, err := datastore.NewQuery("Spot").Order("-UpdatedAt").GetAll(ctx, &spots)
 	if err != nil {
 		ren.JSON(w, http.StatusInternalServerError, map[string]interface{}{"message": "error"})
@@ -42,7 +42,7 @@ func spotGetHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		ren.JSON(w, http.StatusBadRequest, map[string]interface{}{"message": "error, bad resource id"})
 		return
 	}
-	var spot Spot
+	var spot SpotGet
 	spot.SpotCode = spotCode
 	err = datastore.Get(ctx, spot.key(ctx), &spot)
 	if err != nil {
@@ -67,7 +67,10 @@ func spotCreateHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		ren.JSON(w, http.StatusBadRequest, map[string]interface{}{"message": "error, cannot create new entity"})
 		return
 	}
-	ren.JSON(w, http.StatusCreated, map[string]interface{}{"message": "new entity created", "item": spot})
+	var spotGet SpotGet
+	spotGet.SpotCode = spot.SpotCode
+	err = datastore.Get(ctx, spotGet.key(ctx), &spotGet)
+	ren.JSON(w, http.StatusCreated, map[string]interface{}{"message": "new entity created", "item": spotGet})
 }
 
 func spotUpdateHandler(c web.C, w http.ResponseWriter, r *http.Request) {
@@ -103,5 +106,10 @@ func spotUpdateHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		ren.JSON(w, http.StatusForbidden, map[string]interface{}{"message": "error, you cannot edit this spot"})
 		return
 	}
-	ren.JSON(w, http.StatusOK, map[string]interface{}{"message": "entity updated", "item": updateSpot})
+	err = datastore.Get(ctx, checkSpot.key(ctx), &checkSpot)
+	if err != nil {
+		ren.JSON(w, http.StatusNotFound, map[string]interface{}{"message": "error, entity not found"})
+		return
+	}
+	ren.JSON(w, http.StatusOK, map[string]interface{}{"message": "entity updated", "item": checkSpot})
 }
