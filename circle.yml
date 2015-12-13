@@ -26,3 +26,12 @@ test:
   override:
     - $HOME/go_appengine/goapp test
     - wdio wdio.conf.js
+
+deployment:
+  appengine:
+    branch: master
+    commands:
+      - $HOME/go_appengine/appcfg.py --oauth2_refresh_token=$APPENGINE_TOKEN update . --version=dev
+    branch: deployment/production
+    commands:
+      - $HOME/go_appengine/appcfg.py --oauth2_refresh_token=$APPENGINE_TOKEN update . --version=production
