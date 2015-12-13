@@ -6,6 +6,8 @@ dependencies:
   pre:
     - python getlatestsdk.py
     - unzip -q -d $HOME google_appengine.zip
+  override:
+      - $HOME/go_appengine/goapp build
 
 test:
   override:
