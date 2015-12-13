@@ -6,9 +6,19 @@ dependencies:
   pre:
     - python getlatestsdk.py
     - unzip -q -d $HOME google_appengine.zip
+    - npm install -g webdriverio
+    - npm install -g webdriver-manager
   override:
       - echo $HOME
 
 test:
+  pre:
+    - webdriver-manager start:
+        background: true
+    - sleep 5
+    - $HOME/go_appengine/goapp serve:
+        background: true
+    - sleep 5
   override:
     - $HOME/go_appengine/goapp test
+    - wdio wdio.conf.js
