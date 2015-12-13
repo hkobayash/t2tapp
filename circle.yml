@@ -28,10 +28,11 @@ test:
     - wdio wdio.conf.js
 
 deployment:
-  appengine:
+  development:
     branch: master
     commands:
       - $HOME/go_appengine/appcfg.py --oauth2_refresh_token=$APPENGINE_TOKEN update . --version=dev
+  production:
     branch: deployment/production
     commands:
       - $HOME/go_appengine/appcfg.py --oauth2_refresh_token=$APPENGINE_TOKEN update . --version=production
