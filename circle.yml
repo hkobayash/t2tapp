@@ -8,11 +8,15 @@ dependencies:
     - unzip -q -d $HOME google_appengine.zip
     - npm install -g webdriverio
     - npm install -g webdriver-manager
+    - curl -O http://selenium-release.storage.googleapis.com/2.47/selenium-server-standalone-2.47.0.jar
   override:
       - echo $HOME
 
 test:
   pre:
+    - java -jar selenium-server-standalone-2.47.0.jar:
+        background: true
+    - sleep 5
     - webdriver-manager start:
         background: true
     - sleep 5
