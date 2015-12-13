@@ -32,6 +32,8 @@ exports.config = {
     capabilities: [{
         browserName: 'phantomjs'
     }],
+    host: 'localhost',
+    port: 4444,
     //
     // ===================
     // Test Configurations
